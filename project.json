@@ -1,0 +1,11 @@
+{
+  "common":[
+    "Game_SquareDiggingWar.lua"
+   ],
+  "game": [
+    "Game_SquareDiggingWar.lua"
+  ],
+  "ui": [
+
+  ]
+}

@@ -1,0 +1,9 @@
+{
+    "Lua.diagnostics.globals": [
+        "UI",
+        "Game",
+        "Font",
+        "Players",
+        "Common"
+    ]
+}
