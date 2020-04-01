@@ -1,29 +1,47 @@
---功能_显示跳跃时速度
-local SIGNAL_NONE = 0;
-local SIGNAL_SPEED = 1;
-if Game~=nil then
+--功能_显示玩家地速,作者@iPad水晶,QQ:1419427247
+--  project.json
+-------------------------------
+--  {
+--     "common":[
+      
+--      ],
+--     "game": [
+--       "Function_ShowSpeed.lua"
+--     ],
+--     "ui": [
+--       "Function_ShowSpeed.lua"
+--     ]
+--  }
+-------------------------------
+
+if Game then
+    --所有玩家都存储在这个表里
     local Players = {};
+
+    --向移动中的玩家发送他的地速信息
     function Game.Rule:OnUpdate()
         for name, player in pairs(Players) do
-            if player.velocity.z - player.user.HistoricalSpeedZ > 200 then
-                player:Signal(SIGNAL_SPEED);
+            if player.velocity.x ~= 0 and player.velocity.y ~= 0 then
                 player:Signal(math.floor(math.sqrt(player.velocity.x * player.velocity.x + player.velocity.y * player.velocity.y)));
             end
-            player.user.HistoricalSpeedZ = player.velocity.z;
         end
     end
+
     function Game.Rule:OnPlayerConnect(player)
         Players[player.name] = player;
-        player.user.HistoricalSpeedZ = 0;
     end
+
     function Game.Rule:OnPlayerDisconnect(player)
         Players[player.name] = nil;
     end
+
 end
-if UI~=nil then
-    LabelJumpspeed = UI.Text.Create();
-    LabelJumpspeed:Set(
+if UI then
+    --创建一个Text，用来显示地速
+    LabelSpeed = UI.Text.Create();
+    LabelSpeed:Set(
         {
+            text = '0',
             font = 'medium',
             align = 'center',
             x = 0,
@@ -36,30 +54,10 @@ if UI~=nil then
             a = 250
         }
     );
-    local FTime = 0;
-    local state = SIGNAL_NONE;
+    LabelSpeed:Show();
+
     function UI.Event:OnSignal(signal)
-        if state == SIGNAL_NONE then
-            state = signal;
-        else
-            if state == SIGNAL_SPEED then
-                LabelJumpspeed:Set({text = ""..(signal)})
-                state = SIGNAL_NONE
-            else
-                state = SIGNAL_NONE
-            end
-        end
-        LabelJumpspeed:Show();
-        FTime = UI.GetTime();
+        LabelSpeed:Set({text = "" .. (signal)})
     end
-    function UI.Event:OnUpdate(time)
-        if LabelJumpspeed:IsVisible() == true then
-            if UI.GetTime() - FTime > 2 then
-                LabelJumpspeed:Hide();
-            end
-        end
-    end
+
 end
-
-
-
