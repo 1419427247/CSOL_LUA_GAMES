@@ -1,4 +1,4 @@
---功能_投票禁止玩家游戏,阉割掉了没有用到过的方块,作者@iPad水晶,QQ:1419427247
+--功能_投票禁止玩家游戏,按O打开面板选择玩家,鼠标左键发起投票,阉割掉了没有用到过的方法,作者@iPad水晶,QQ:1419427247
 --  project.json
 -------------------------------
 --  {
@@ -79,15 +79,10 @@ local Event = (function()
     end
 
     function Event:addEventListener(name,event)
-        if self.array[name] == nil then
-            error("未找到事件'" .. name .. "'");
-        end
         if type(event) == "function" then
             self.array[name][#self.array[name] + 1] = {self.id,event};
             self.id = self.id + 1;
             return self.id - 1;
-        else
-            error("它应该是一个函数");
         end
     end
 
@@ -144,7 +139,7 @@ if Game then
         No = Game.SyncValue.Create("No"),
     }
 
-    --禁止玩家
+    --禁止玩家的函数
     function BanedPlayer(player)
         player:Kill();
     end
@@ -156,7 +151,7 @@ if Game then
     end);
 
     Event:addEventListener("OnPlayerSignal",function(player,signal)
-        if signal <= 24 then
+        if signal <= 24 and VotingBan.State.value == StateVotingBan.None then
             VotingBan.Baned.value = (Game.Player:Create(signal) or {name = "未知"}).name;
             print(player.name .. "提议禁止:".. VotingBan.Baned.value);
             VotingBan.State.value = StateVotingBan.Voting;
@@ -357,6 +352,7 @@ if UI then
                 name[#name+1] = string.sub(SyncPlayerNames.value,i,i);
             end
         end
+        --SelectWindow.index = 1;
     end
     
     function SyncBaned:OnSync()
@@ -380,14 +376,14 @@ if UI then
 
         Graphics.color = {255,255,255,255};
 
-        Graphics:DrawText(25,60,2,32,"选择玩家");
+        Graphics:DrawText(25,60,2,28,"选择玩家");
 
         if self.index > #self.playernames then
             self.index = 1;
         end
         Graphics:DrawText(20,100,2,28,"◀" .. self.playernames[self.index] .."▶");
 
-        Graphics:DrawText(25,140,2,36,"禁止游戏");
+        Graphics:DrawText(25,140,2,28,"提议禁止游戏");
 
         Graphics.color = {222,222,222,128};
         Graphics:DrawRect(20,90,300,2);
