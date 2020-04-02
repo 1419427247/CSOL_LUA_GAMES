@@ -169,7 +169,6 @@ if Game then
 
     Event:addEventListener("OnPlayerSignal",function(player,signal)
         if signal <= 24 then
-            VotingBan.State.value = StateVotingBan.Voting;
             VotingBan.Baned.value = (Game.Player:Create(signal) or {name = "未知"}).name;
             print(player.name .. "提议禁止:".. VotingBan.Baned.value);
             VotingBan.State.value = StateVotingBan.Voting;
@@ -396,6 +395,7 @@ if UI then
 
     local VotingWindow = {
         name = "",
+        vote = "none",
         yes = UI.SyncValue.Create("Yes"),
         no = UI.SyncValue.Create("No"),
     };
@@ -415,62 +415,65 @@ if UI then
     
     function SyncBaned:OnSync()
         VotingWindow.name = self.value;
-        ShowVotingWindow = true;
-        ShowSelectWindow = false;
     end
 
     function SyncState:OnSync()
         if self.value == StateVotingBan.Voting then
             ShowSelectWindow = false;
+            ShowVotingWindow = true;
+            Timer:schedule(function()
+                ShowVotingWindow = false;
+                VotingWindow.vote = "none";
+            end,1200);
         end
     end
 
     function SelectWindow:Show()
         Graphics.color = {123,123,123,123};
-        Graphics:DrawRect(140,50,300,120);
+        Graphics:DrawRect(20,50,300,120);
 
         Graphics.color = {255,255,255,255};
 
-        Graphics:DrawText(150,60,2,32,"选择玩家");
+        Graphics:DrawText(25,60,2,32,"选择玩家");
 
         if self.index > #self.playernames then
             self.index = 1;
         end
-        Graphics:DrawText(150,100,2,36,"◀" .. self.playernames[self.index] .."▶");
+        Graphics:DrawText(20,100,2,28,"◀" .. self.playernames[self.index] .."▶");
 
-        Graphics:DrawText(150,140,2,32,"禁止游戏");
+        Graphics:DrawText(25,140,2,36,"禁止游戏");
 
         Graphics.color = {222,222,222,128};
-        Graphics:DrawRect(140,90,300,2);
-        Graphics:DrawRect(140,130,300,2);
+        Graphics:DrawRect(20,90,300,2);
+        Graphics:DrawRect(20,130,300,2);
     end
 
     function VotingWindow:Show()
         Graphics.color = {123,123,123,123};
-        Graphics:DrawRect(0,0,800,100);
+        Graphics:DrawRect(0,0,600,120);
 
         Graphics.color = {255,255,255,255};
 
         Graphics:DrawText(20,15,2,25,"有人提议禁止玩家:" .. SyncBaned.value);
 
-        Graphics:DrawText(20,50,2,32,"同意/8|" .. math.floor(self.yes.value));
-        Graphics:DrawText(20,80,2,32,"反对/9|" .. math.floor(self.no.value));
+        if VotingWindow.vote == "yes" then
+            Graphics.color = {255,30,30,255};
+        end
+        Graphics:DrawText(20,50,2,32,"8:同意--" .. math.floor(self.yes.value));
+
+        Graphics.color = {255,255,255,255};
+        if VotingWindow.vote == "no" then
+            Graphics.color = {255,30,30,255};
+        end
+        Graphics:DrawText(20,80,2,32,"9:反对--" .. math.floor(self.no.value));
     end
 
-    local flat = false;
     Event:addEventListener("OnUpdate",function(time)
         Graphics:Clean();
         if ShowSelectWindow == true then
             SelectWindow:Show();
         elseif ShowVotingWindow == true then
             VotingWindow:Show();
-            if flat == false then
-                flat = true;
-                Timer:schedule(function()
-                    ShowVotingWindow = false;
-                    flat = false;
-                end,1200);
-            end
         end
     end);
 
@@ -486,7 +489,7 @@ if UI then
             ShowSelectWindow = false;
         end
 
-        if inputs[UI.KEY.LEFT] == true and ShowSelectWindow == true then
+        if inputs[UI.KEY.LEFT] == true and ShowSelectWindow == true and SyncState.value == StateVotingBan.None then
             if SelectWindow.index == 1 then
                 SelectWindow.index = #SelectWindow.playernames;
             else
@@ -494,7 +497,7 @@ if UI then
             end
         end      
 
-        if inputs[UI.KEY.RIGHT] == true and ShowSelectWindow == true then
+        if inputs[UI.KEY.RIGHT] == true and ShowSelectWindow == true and SyncState.value == StateVotingBan.None then
             if SelectWindow.index == #SelectWindow.playernames then
                 SelectWindow.index = 1;
             else
@@ -502,14 +505,18 @@ if UI then
             end
         end
 
-        if inputs[UI.KEY.NUM8] == true and ShowVotingWindow == true then
-            UI.Signal(Signal_Y);
-            ShowVotingWindow = false;
+        if inputs[UI.KEY.NUM8] == true and ShowVotingWindow == true and SyncState.value == StateVotingBan.Voting then
+            if VotingWindow.vote == "none" then
+                UI.Signal(Signal_Y);
+                VotingWindow.vote = "yes";
+            end
         end
 
-        if inputs[UI.KEY.NUM9] == true and ShowVotingWindow == true then
-            UI.Signal(Signal_N);
-            ShowVotingWindow = false;
+        if inputs[UI.KEY.NUM9] == true and ShowVotingWindow == true and SyncState.value == StateVotingBan.Voting then
+            if VotingWindow.vote == "none" then
+                UI.Signal(Signal_N);
+                VotingWindow.vote = "no";
+            end
         end
     end);
 
