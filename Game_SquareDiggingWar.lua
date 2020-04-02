@@ -47,7 +47,7 @@ if Game then
                 if block ~= nil and block.id == 225 and block.onoff == false then
                     Blocks[#Blocks+1] = {Count + Difficulty - 1,block};
                 end
-                if Game.RandomInt(1,Difficulty - 3) == 1 then
+                if Game.RandomInt(1,Difficulty - 2) == 1 then
                     local block = Game.EntityBlock:Create({
                         x = Players[i].position.x + Game.RandomInt(-1,1),
                         y = Players[i].position.y + Game.RandomInt(-1,1),
