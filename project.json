@@ -3,9 +3,16 @@
     
    ],
   "game": [
-    "Game_SquareDiggingWar.lua"
+    "Function_VotingBan.lua"
   ],
   "ui": [
-    "Game_SquareDiggingWar.lua"
+    "Font/Font_1.lua",
+    "Font/Font_2.lua",
+    "Font/Font_3.lua",
+    "Font/Font_4.lua",
+    "Font/Font_5.lua",
+    "Font/Font_6.lua",
+    "Font/Font_7.lua",
+    "Function_VotingBan.lua"
   ]
 }

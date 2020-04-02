@@ -1,6 +1,6 @@
---游戏_危机长夜
+--游戏_危机长夜,作者@iPad水晶,QQ:1419427247
 
-Event = (function()
+local Event = (function()
     local Event = {
         array = {},
         id = 1,
@@ -61,7 +61,7 @@ Event = (function()
     return setmetatable({},Event);
 end)();
 
-Timer = (function()
+local Timer = (function()
     local Timer = {
         id = 1,
         tasks = {},
@@ -109,7 +109,7 @@ Timer = (function()
     return Timer;
 end)();
 
-Graphics = (function()
+local Graphics = (function()
     if UI==nil then
         return nil;
     end

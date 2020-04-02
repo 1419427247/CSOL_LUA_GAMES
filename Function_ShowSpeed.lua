@@ -1,4 +1,4 @@
---功能_显示玩家地速,作者@iPad水晶,QQ:1419427247
+--功能_显示玩家地速,静止时不显示地速,作者@iPad水晶,QQ:1419427247
 --  project.json
 -------------------------------
 --  {
@@ -54,10 +54,20 @@ if UI then
             a = 250
         }
     );
-    LabelSpeed:Show();
-
+    
+    local count = 0;
+    
     function UI.Event:OnSignal(signal)
-        LabelSpeed:Set({text = "" .. (signal)})
+        count = 0;
+        LabelSpeed:Show();
+        LabelSpeed:Set({text = "" .. (signal)});
     end
 
+    function UI.Event:OnUpdate()
+        count = count + 1;
+        if count == 50 then
+            LabelSpeed:Hide();
+            count = 0;
+        end
+    end
 end

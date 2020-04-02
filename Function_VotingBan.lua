@@ -1,4 +1,4 @@
---功能_投票禁止玩家游戏,作者@iPad水晶,QQ:1419427247
+--功能_投票禁止玩家游戏,阉割掉了没有用到过的方块,作者@iPad水晶,QQ:1419427247
 --  project.json
 -------------------------------
 --  {
@@ -89,18 +89,6 @@ local Event = (function()
         else
             error("它应该是一个函数");
         end
-    end
-
-    function Event:detachEventListener(id)
-        for name,_ in pairs(self.array) do
-            for i = 1, #self.array[name],1 do
-                if self.array[name][i][1] == id then
-                    table.remove(self.array[name],i);
-                    return;
-                end
-            end
-        end
-        error("未找到'" .. id .. "'");
     end
 
     function Event:run(name,...)
@@ -327,49 +315,7 @@ if UI then
             self.id = self.id + 1;
             return self.id - 1;
         end
-    
-        function Graphics:Remove(id)
-            for i = 1,#self.root do
-                if self.root[i][1] == id then
-                    self.root[i] = nil;
-                    collectgarbage("collect");
-                    return;
-                end
-            end
-        end
-    
-        function Graphics:Show(id)
-            for i = 1,#self.root do
-                if self.root[i][1] == id then
-                    for j = 1,#self.root[i][2] do
-                        self.root[i][2][j]:Show();
-                    end
-                    return;
-                end
-            end
-        end
-    
-        function Graphics:Hide(id)
-            for i = 1,#self.root do
-                if self.root[i][1] == id then
-                    for j = 1,#self.root[i][2] do
-                        self.root[i][2][j]:Hide();
-                    end
-                    return;
-                end
-            end
-        end
-    
-        function Graphics:GetTextSize(length,fontsize,letterspacing)
-            if length == 0 then
-                return 0,12 * fontsize;
-            end
-            local width = (length - 1) * letterspacing + 11 * fontsize;
-            local height = 12 * fontsize;
-            return width,height;
-        end
-    
-        
+
         function Graphics:Clean()
             self.root = {};
             collectgarbage("collect");
