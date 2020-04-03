@@ -1,4 +1,4 @@
---功能_键盘方法,按K键自杀,按J加100血,按空格高跳,作者@iPad水晶,QQ:1419427247
+--功能_键盘方法,按K键自杀,按J加100血,按空格高跳,按SHIFT冲刺,作者@iPad水晶,QQ:1419427247
 --  project.json
 -------------------------------
 --  {
@@ -18,11 +18,12 @@ local Signal_Suicide = 1;
 --信号_恢复100生命
 local Signal_Restore = 2;
 --信号_高跳
-local Signal_SuperJump = 2;
-
-if Game then
+local Signal_SuperJump = 3;
+--信号_冲呀
+local Signal_Rush = 4;
+if Game~= nil then
     --当玩家使用UI.Signal时调用的事件回调
-    function UI.Event:OnPlayerSignal(player,signal);
+    function Game.Rule:OnPlayerSignal(player,signal);
         if signal == Signal_Suicide then
             print("你死了/(ㄒ_ㄒ)/~~");
             player:Kill();
@@ -38,14 +39,21 @@ if Game then
             player.velocity = {
                 x = player.velocity.x,
                 y = player.velocity.y,
-                z = 500,
+                z = 800,
+            };
+        elseif signal == Signal_Rush then
+            print("你在冲啊");
+            player.velocity = {
+                x = player.velocity.x * 20,
+                y = player.velocity.y * 20,
+                z = player.velocity.z,
             };
         end
+
     end
 end
 
-if UI then
-
+if UI ~= nil then
     --玩家按下某个键时调用的事件回调,inputs是一个数组,用于存储发生KeyDown事件的键
     function UI.Event:OnKeyDown(inputs)
 
@@ -56,13 +64,17 @@ if UI then
 
         if inputs[UI.KEY.J] == true then
             print("你按下了J");
-            UI.Signal(Signal_Suicide);
+            UI.Signal(Signal_Restore);
         end
 
         if inputs[UI.KEY.SPACE] == true then
             print("你按下了空格");
             UI.Signal(Signal_SuperJump);
         end
-        
+
+        if inputs[UI.KEY.SHIFT] == true then
+            print("你按下了SHIFT");
+            UI.Signal(Signal_Rush);
+        end
     end
 end
