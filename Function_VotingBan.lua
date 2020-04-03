@@ -213,7 +213,6 @@ if Game then
             names[#names+1] = " ";
         end
         VotingBan.PlayerNames.value = table.concat(names);
-
         NumbersPlayers = NumbersPlayers + 1;
     end);
 
@@ -221,14 +220,15 @@ if Game then
         local names = {};
         for i = 1,24 do
             local p = Game.Player:Create(i);
-            if p == nil or p.name == player then
-                break;
+            if p == nil then
+                break; 
             end
-            names[#names+1] = p.name;
-            names[#names+1] = " ";
+            if p.name ~= player.name then
+                names[#names+1] = p.name;
+                names[#names+1] = " ";
+            end
         end
         VotingBan.PlayerNames.value = table.concat(names);
-
         NumbersPlayers = NumbersPlayers - 1;
     end);
 end
@@ -401,13 +401,13 @@ if UI then
         if VotingWindow.vote == "yes" then
             Graphics.color = {255,30,30,255};
         end
-        Graphics:DrawText(20,50,2,32,"8:同意--" .. math.floor(self.yes.value));
+        Graphics:DrawText(20,50,2,32,"8:同意--" .. math.floor(self.yes.value or 0));
 
         Graphics.color = {255,255,255,255};
         if VotingWindow.vote == "no" then
             Graphics.color = {255,30,30,255};
         end
-        Graphics:DrawText(20,80,2,32,"9:反对--" .. math.floor(self.no.value));
+        Graphics:DrawText(20,80,2,32,"9:反对--" .. math.floor(self.no.value or 0));
     end
 
     Event:addEventListener("OnUpdate",function(time)
