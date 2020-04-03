@@ -221,9 +221,8 @@ if Game then
         for i = 1,24 do
             local p = Game.Player:Create(i);
             if p == nil then
-                break; 
-            end
-            if p.name ~= player.name then
+                break;
+            elseif p.name ~= player.name then
                 names[#names+1] = p.name;
                 names[#names+1] = " ";
             end
@@ -329,6 +328,8 @@ if UI then
     
     local ShowVotingWindow = false;
 
+    local IsCoolingDown = false;
+
     local SelectWindow = {
         playernames = {""},
         index = 1,
@@ -391,12 +392,18 @@ if UI then
     end
 
     function VotingWindow:Show()
+        if IsCoolingDown == true then
+            Graphics.color = {255,255,255,255};
+            Graphics:DrawText(20,15,2,25,"冷却中，无法发起投票");
+            return;
+        end
+
         Graphics.color = {123,123,123,123};
         Graphics:DrawRect(0,0,600,120);
 
         Graphics.color = {255,255,255,255};
 
-        Graphics:DrawText(20,15,2,25,"有人提议禁止玩家:" .. SyncBaned.value);
+        Graphics:DrawText(20,15,2,25,"有人提议禁止玩家:" .. (SyncBaned.value or "unknow"));
 
         if VotingWindow.vote == "yes" then
             Graphics.color = {255,30,30,255};
@@ -426,9 +433,13 @@ if UI then
             ShowSelectWindow = false;
         end
 
-        if inputs[UI.KEY.MOUSE1] == true and SyncState.value == StateVotingBan.None and ShowSelectWindow == true then
+        if inputs[UI.KEY.MOUSE1] == true and SyncState.value == StateVotingBan.None and ShowSelectWindow == true and IsCoolingDown == false then
             UI.Signal(SelectWindow.index);
             ShowSelectWindow = false;
+            IsCoolingDown = true;
+            Timer:schedule(function()
+                IsCoolingDown = false;
+            end,30000);
         end
 
         if inputs[UI.KEY.LEFT] == true and ShowSelectWindow == true and SyncState.value == StateVotingBan.None then
