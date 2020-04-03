@@ -372,6 +372,12 @@ if UI then
     end
 
     function SelectWindow:Show()
+        if IsCoolingDown == true then
+            Graphics.color = {255,255,255,255};
+            Graphics:DrawText(20,15,2,25,"冷却中，无法发起投票");
+            return;
+        end
+
         Graphics.color = {123,123,123,123};
         Graphics:DrawRect(20,50,300,120);
 
@@ -392,12 +398,6 @@ if UI then
     end
 
     function VotingWindow:Show()
-        if IsCoolingDown == true then
-            Graphics.color = {255,255,255,255};
-            Graphics:DrawText(20,15,2,25,"冷却中，无法发起投票");
-            return;
-        end
-
         Graphics.color = {123,123,123,123};
         Graphics:DrawRect(0,0,600,120);
 
