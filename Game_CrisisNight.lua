@@ -390,9 +390,10 @@ end)();
 local NONE = 0;
 local SKILL = {
     WORLD = {
-        TOBEZOMBIE = {NAME = "变身怪物",SIGNAL = 101,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
-        TOBEHUMAN = {NAME = "变身人类",SIGNAL = 102,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
-        SLOWDOWN = {NAME = "减速",SIGNAL = 103,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
+        TOBEZOMBIE = {NAME = "变身怪物",SIGNAL = 1,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
+        TOBEHUMAN = {NAME = "变身人类",SIGNAL = 2,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
+        SLOWDOWN = {NAME = "减速",SIGNAL = 3,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,SPEED = 1}},
+        DISCOLOR = {NAME = "变色",SIGNAL = 4,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,COLOR = {red = 255,green = 255,blue = 255}}},
     },
     ZOMBIE = {
         FATALBLOW = {NAME = "致命打击",SIGNAL = 101,ISFREEZE = false,COOLDOWNTIME = 60,MEMORY = {}},
@@ -468,14 +469,29 @@ if Game ~= nil then
     function SKILL.WORLD.SLOWDOWN:CALL(player)
         local id = Event:addEventListener("OnUpdate",function(time)
             player.velocity = {
-                x = player.velocity.x * 0.4,
-                y = player.velocity.y * 0.4,
-                z = player.velocity.z * 0.4,
+                x = player.velocity.x * self.MEMORY.SPEED,
+                y = player.velocity.y * self.MEMORY.SPEED,
+                z = player.velocity.z * self.MEMORY.SPEED,
             };
         end);
         Timer:schedule(function()
             Event:detachEventListener(id);
-        end,self.MEMORY.VALUE);
+        end,self.MEMORY.DURATION);
+    end
+
+    function SKILL.WORLD.DISCOLOR:CALL(player)
+        if player.team == Game.TEAM.CT then
+            self.MEMORY.COLOR = {red = 0,green = 0,blue = 255};
+        end
+        if player.team == Game.TEAM.T then
+            self.MEMORY.COLOR = {red = 255,green = 0,blue = 0};
+        end
+        player:SetRenderFX(Game.RENDERFX.GLOWSHELL);
+        player:SetColor(self.MEMORY.COLOR);
+        Timer:schedule(function()
+            player:SetRenderFX(Game.RENDERFX.NONE);
+            player:SetColor({red = 255,green = 255,blue = 255});
+        end,self.MEMORY.DURATION);
     end
 
     function SKILL.ZOMBIE.FATALBLOW:CALL(zombie)
@@ -555,7 +571,12 @@ if Game ~= nil then
             (zombie.position.y - Human.Players[i].position.y) * (zombie.position.y - Human.Players[i].position.y) +
             (zombie.position.z - Human.Players[i].position.z) * (zombie.position.z - Human.Players[i].position.z);
             if length < 400 then
-                --Human.Players[i]
+                Human.Players[i].velocity = {
+                    x = Human.Players[i].velocity.x,
+                    y = Human.Players[i].velocity.y,
+                    z = 1200,
+                };
+                Human.Players[i].health = Human.Players[i].health - length / 2;
             end
         end
     end
@@ -581,7 +602,7 @@ if Game ~= nil then
                     if monster ~= nil then
                         print("怪物停止追踪");
                     end
-                end,30);
+                end,30) ;
             end
         end
     end
@@ -881,7 +902,3 @@ if UI ~= nil then
     end);
 
 end
-
-
-
-
