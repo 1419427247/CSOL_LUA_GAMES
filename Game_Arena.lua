@@ -1,4 +1,6 @@
---游戏_角斗场,作者@iPad水晶,QQ:1419427247
+--游戏_角斗场,无限的尸潮,最后活下来的才是胜利者,作者@iPad水晶,QQ:1419427247
+--游戏初始时需要使用脚本调用方块设置一次怪物出生地, 函数名:CreateMonsterBirthplace 参数:CT 或者 TR
+--请使用虚拟对手集结装置让怪物移动到指定的区域
 -- {
 --     "common":[
 --       "Game_Arena.lua"
@@ -268,6 +270,7 @@ if Game then
         TR = {},
     };
 
+    --储存怪物的初始值
     local Monster = {
       NORMAL0 = {type = Game.MONSTERTYPE.NORMAL0,damage = 10,speed = 0.5,health = 40,coin = 150},
       NORMAL1 = {type = Game.MONSTERTYPE.NORMAL1,damage = 12,speed = 0.64,health = 37,coin = 180},
