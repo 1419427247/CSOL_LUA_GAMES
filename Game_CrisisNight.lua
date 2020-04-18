@@ -393,7 +393,7 @@ local SKILL = {
         TOBEZOMBIE = {NAME = "变身怪物",SIGNAL = 1,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
         TOBEHUMAN = {NAME = "变身人类",SIGNAL = 2,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {}},
         SLOWDOWN = {NAME = "减速",SIGNAL = 3,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,SPEED = 1}},
-        DISCOLOR = {NAME = "变色",SIGNAL = 4,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,COLOR = {red = 255,green = 255,blue = 255}}},
+        DISCOLOR = {NAME = "变色",SIGNAL = 4,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,COLOR = {r = 255,g = 255,b = 255}}},
     },
     ZOMBIE = {
         FATALBLOW = {NAME = "致命打击",SIGNAL = 101,ISFREEZE = false,COOLDOWNTIME = 60,MEMORY = {DURATION = 30}},
@@ -482,20 +482,15 @@ if Game ~= nil then
     end
 
     function SKILL.WORLD.DISCOLOR:CALL(player)
-        if player.team == Game.TEAM.CT then
-            self.MEMORY.COLOR = {red = 0,green = 0,blue = 255};
-        end
-        if player.team == Game.TEAM.T then
-            self.MEMORY.COLOR = {red = 255,green = 0,blue = 0};
-        end
         player:SetRenderFX(Game.RENDERFX.GLOWSHELL);
-        player:SetColor(self.MEMORY.COLOR);
-        Timer:schedule(function()
-            if player ~= nil then
-                player:SetRenderFX(Game.RENDERFX.NONE);
-                player:SetColor({red = 255,green = 255,blue = 255});
-            end
-        end,self.MEMORY.DURATION);
+        player:SetRenderColor(self.MEMORY.COLOR);
+        if self.MEMORY.DURATION ~= 0 then
+            Timer:schedule(function()
+                if player ~= nil then
+                    player:SetRenderFX(Game.RENDERFX.NONE);
+                end
+            end,self.MEMORY.DURATION);
+        end
     end
 
     function SKILL.ZOMBIE.FATALBLOW:CALL(zombie)
@@ -521,6 +516,10 @@ if Game ~= nil then
             y = zombie.velocity.y,
             z = zombie.velocity.z + self.MEMORY.VALUE * 5,
         };
+
+        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 1.5;
+        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 128,g = 244,b = 244};
+        SKILL.WORLD.DISCOLOR:CALL(zombie);
     end
 
     function SKILL.ZOMBIE.GHOSTSTEP:CALL(zombie)
@@ -532,14 +531,14 @@ if Game ~= nil then
             y = math.floor(zombie.position.y + self.MEMORY.VALUE * self.MEMORY.VALUE / 400 * zombie.velocity.y / length),
             z = math.floor(zombie.position.z),
         };
-        zombie.velocity = {
-            x = 0,
-            y = 0,
-            z = 0,
-        };
+
         SKILL.WORLD.SLOWDOWN.MEMORY.DURATION = 3;
-        SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.3;
+        SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.1;
         SKILL.WORLD.SLOWDOWN:CALL(zombie);
+
+        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 1.5;
+        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 255,g = 32,b = 32};
+        SKILL.WORLD.DISCOLOR:CALL(zombie);
     end
 
     function SKILL.ZOMBIE.LIGHTWEIGHT:CALL(zombie)
@@ -584,6 +583,9 @@ if Game ~= nil then
                 Human.Players[i].health = Human.Players[i].health - (500 - length) / 2;
             end
         end
+        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 1.5;
+        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 255,g = 128,b = 128};
+        SKILL.WORLD.DISCOLOR:CALL(zombie);
     end
 
     function SKILL.ZOMBIE.LISTEN:CALL(zombie)
@@ -595,6 +597,9 @@ if Game ~= nil then
             local monster = Game.Monster:Create(Game.MONSTERTYPE.PUMPKINHEAD,zombie.position);
             local human = Human.Players[Game.RandomInt(1, #Human.Players)];
             if monster ~= nil and human ~= nil then
+                SKILL.WORLD.DISCOLOR.MEMORY.DURATION = self.MEMORY.DURATION;
+                SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 255,g = 128,b = 128};
+                SKILL.WORLD.DISCOLOR:CALL(monster);
                 monster.speed = 0.8;
                 local id = Timer:schedule(function()
                     if human ~= nil then
@@ -614,9 +619,22 @@ if Game ~= nil then
     function SKILL.ZOMBIE.SURVEILLANCE:CALL(zombie)
         if self.MEMORY.MONSTER == nil then
             self.MEMORY.MONSTER = Game.Monster:Create(Game.MONSTERTYPE.A104RL,zombie.position);
-            self.MEMORY.MONSTER:Stop(true);
+            if self.MEMORY.MONSTER ~= nil then
+                self.MEMORY.MONSTER:Stop(true);
+                SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 0;
+                SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 64,g = 64,b = 198};
+                SKILL.WORLD.DISCOLOR:CALL(self.MEMORY.MONSTER);
+                Timer:schedule(function()
+                    if self.MEMORY.MONSTER ~= nil then
+                        self.MEMORY.MONSTER:Hold(true);
+                        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 0;
+                        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 198,g = 64,b = 64};
+                        SKILL.WORLD.DISCOLOR:CALL(self.MEMORY.MONSTER);
+                    end
+                end,5);
+            end
         else
-            zombie.position = self.MEMORY.MONSTER.position;
+            --zombie.position = self.MEMORY.MONSTER.position;
             --self.MEMORY.MONSTER ;
             self.MEMORY.MONSTER = nil;
         end
@@ -644,6 +662,9 @@ if Game ~= nil then
                 z = human.velocity.z,
             };
         end
+        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 0.5;
+        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 24,g = 24,b = 128};
+        SKILL.WORLD.DISCOLOR:CALL(human);
     end
 
     function SKILL.HUMAN.CURE:CALL(human)
@@ -652,6 +673,9 @@ if Game ~= nil then
         else
             human.health = human.maxhealth;
         end
+        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 0.5;
+        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 24,g = 177,b = 128};
+        SKILL.WORLD.DISCOLOR:CALL(human);
     end
 
     function SKILL.HUMAN.FIRESTRIKE:CALL(human)
@@ -659,7 +683,7 @@ if Game ~= nil then
     end
 
     function SKILL.HUMAN.ADRENALHORMONE:CALL(human)
-
+        
     end
 
     local SignalState = NONE;
@@ -695,18 +719,18 @@ if Game ~= nil then
         if GameState == State.Ready then
             if #Players >= 1 then
 
-                --SKILL.WORLD.TOBEHUMAN:CALL(Players[1]);
+                SKILL.WORLD.TOBEHUMAN:CALL(Players[1]);
 
                 GameState = State.Start;
                 SyncGameState.value = GameState;
             end
         elseif GameState == State.Start then
             for i=1,#Zombie.SkillsUsed do
-	            Zombie.SkillsUsed[i][2]:CALL(Zombie.SkillsUsed[i][1]);
+	            pcall(Zombie.SkillsUsed[i][2].CALL,Zombie.SkillsUsed[i][2],Zombie.SkillsUsed[i][1]);
             end
 
             for i=1,#Human.SkillsUsed do
-	            Human.SkillsUsed[i][2]:CALL(Human.SkillsUsed[i][1]);
+	            pcall(Human.SkillsUsed[i][2].CALL,Human.SkillsUsed[i][2],Human.SkillsUsed[i][1]);
             end
             Zombie.SkillsUsed = {};
             Human.SkillsUsed = {};
@@ -715,7 +739,7 @@ if Game ~= nil then
 
     Timer:schedule(function()
         for i = 1,#Human.Players do
-            print("玩家".. Human.Players[i].name .."生命减少50点");
+            print("玩家".. Human.Players[i].name .."生命减少10点");
             Human.Players[i].health = Human.Players[i].health - 10;
         end
     end,0,5);
