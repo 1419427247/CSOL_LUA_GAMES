@@ -270,7 +270,7 @@ if Game then
         TR = {},
     };
 
-    --储存怪物的初始值
+    --储存怪物的初始信息
     local Monster = {
       NORMAL0 = {type = Game.MONSTERTYPE.NORMAL0,damage = 10,speed = 0.5,health = 40,coin = 150},
       NORMAL1 = {type = Game.MONSTERTYPE.NORMAL1,damage = 12,speed = 0.64,health = 37,coin = 180},
