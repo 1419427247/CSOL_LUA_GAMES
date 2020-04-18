@@ -1,3 +1,23 @@
+--游戏_角斗场,作者@iPad水晶,QQ:1419427247
+-- {
+--     "common":[
+--       "Game_Arena.lua"
+--      ],
+--     "game": [
+--       "Game_Arena.lua"
+--     ],
+--     "ui": [
+--       "Font/Font_1.lua",
+--       "Font/Font_2.lua",
+--       "Font/Font_3.lua",
+--       "Font/Font_4.lua",
+--       "Font/Font_5.lua",
+--       "Font/Font_6.lua",
+--       "Font/Font_7.lua",
+--       "Game_Arena.lua"
+--     ]
+--   }
+
 local Event = (function()
     local Event = {
         array = {},
@@ -295,6 +315,12 @@ if Game then
     local GameStarted = false;
     local NewRound = false;
 
+    --升级怪物需要的硬币数
+    local Monster_Update_Coin = 6000;
+    --升级玩家需要的硬币数
+    local Player_Update_Coin = 2000;
+
+    --游戏回合数
     local Round = Game.SyncValue:Create("Round");
 
     local CTKills = Game.SyncValue:Create("CTKills");
@@ -303,6 +329,7 @@ if Game then
     local CTLevel = Game.SyncValue:Create("CTLevel");
     local TRLevel = Game.SyncValue:Create("TRLevel");
 
+    --每个回合的时长
     local Count = Game.SyncValue:Create("Count");
     local Message = Game.SyncValue:Create("Message");
 
@@ -321,6 +348,7 @@ if Game then
         TR = {},
     };
 
+    --单个阵营允许刷新的最大僵尸数
     local MaxMonsterNumber = 20;
 
     local CTMonsters = 0;
@@ -351,13 +379,13 @@ if Game then
                 p_monster.health = math.floor(monster.health * (1 + CTLevel.value / 3));
                 p_monster.damage = math.floor(monster.damage * (1 + CTLevel.value / 5));
                 p_monster.speed = monster.speed + CTLevel.value * 0.04;
-                p_monster.coin = monster.coin + math.floor(TRLevel.value * 8.75);
+                p_monster.coin = monster.coin + math.floor(CTLevel.value * 8.75);
                 CTMonsters = CTMonsters + 1;
             elseif team == Game.TEAM.TR then
                 p_monster.health = math.floor(monster.health * (1 + TRLevel.value / 3));
                 p_monster.damage = math.floor(monster.damage * (1 + TRLevel.value / 5));
                 p_monster.speed = monster.speed + TRLevel.value * 0.04;
-                p_monster.coin = monster.coin + math.floor(CTLevel.value * 8.75);
+                p_monster.coin = monster.coin + math.floor(TRLevel.value * 8.75);
                 TRMonsters = TRMonsters + 1;
             end
         end
@@ -366,8 +394,9 @@ if Game then
     Event:addEventListener("OnPlayerSignal",function(player,signal)
         if signal == SIGNAL.OPEN_WEAPON_PACK then
             player:ShowBuymenu();
+
         elseif signal == SIGNAL.MONSTER_LEVEL_UP then
-            if player.coin >= 6000 then
+            if player.coin >= Monster_Update_Coin then
                 if player.team == Game.TEAM.CT then
                     Message.value = "CT升级了僵尸";
                     TRLevel.value = TRLevel.value + 1;
@@ -375,10 +404,11 @@ if Game then
                     Message.value = "TR升级了僵尸";
                     CTLevel.value = CTLevel.value + 1;
                 end
-                player.coin = player.coin - 6000;
+                player.coin = player.coin - Monster_Update_Coin;
             end
+
         elseif signal == SIGNAL.PLAYER_LEVEL_UP then
-            if player.coin >= 3000 then
+            if player.coin >= Player_Update_Coin then
                 player.user.level = player.user.level + 1;
 
                 player.maxhealth = player.maxhealth + 5;
@@ -387,7 +417,7 @@ if Game then
                 player.maxarmor = player.maxarmor + 5;
                 player.armor = player.maxarmor;
                 
-                player.coin = player.coin - 3000;
+                player.coin = player.coin - Player_Update_Coin;
                 Message.value = player.name .. player.user.level .. "级";
             end
         end
@@ -526,6 +556,7 @@ if Game then
                     Count.value = Count.value - 1;
                     if Count.value == 0 then
                         Game.SetTrigger("OnRoundOver",true);
+                        --本回合杀敌最多的阵营，存活的人回满生命和护甲，并得到金钱奖励
                         if CTKills.value > TRKills.value then
                             Message.value = "CT胜利";
                             for i = 1,#Players.CT do
@@ -610,7 +641,7 @@ if UI then
         Graphics:DrawText(Graphics.screenwidth / 2 - 98,25,2,22,tostring(math.floor(TRKills.value or 0)));
     
         Graphics:DrawText(Graphics.screenwidth - 228,Graphics.screenheight - 208,2,22,"E:僵尸升级 6k");
-        Graphics:DrawText(Graphics.screenwidth - 228,Graphics.screenheight - 242,2,22,"U:自身升级 3k");
+        Graphics:DrawText(Graphics.screenwidth - 228,Graphics.screenheight - 242,2,22,"U:自身升级 2k");
         
     end,1,0.5);
 
