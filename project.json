@@ -3,7 +3,7 @@
     
    ],
   "game": [
-    "Game_Arena.lua"
+    "Game_CrisisNight.lua"
   ],
   "ui": [
     "Font/Font_1.lua",
@@ -13,6 +13,6 @@
     "Font/Font_5.lua",
     "Font/Font_6.lua",
     "Font/Font_7.lua",
-    "Game_Arena.lua"
+    "Game_CrisisNight.lua"
   ]
 }

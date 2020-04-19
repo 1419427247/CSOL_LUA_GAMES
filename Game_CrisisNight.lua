@@ -1,4 +1,4 @@
---游戏_危机长夜,作者@iPad水晶,QQ:1419427247
+--游戏_危机长夜，作者@iPad水晶,QQ:1419427247
 
 local Event = (function()
     local Event = {
@@ -395,6 +395,7 @@ local SKILL = {
         SLOWDOWN = {NAME = "减速",SIGNAL = 3,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,SPEED = 1}},
         DISCOLOR = {NAME = "变色",SIGNAL = 4,ISFREEZE = false,COOLDOWNTIME = 0,MEMORY = {DURATION = 3,COLOR = {r = 255,g = 255,b = 255}}},
     },
+    --僵尸技能
     ZOMBIE = {
         FATALBLOW = {NAME = "致命打击",SIGNAL = 101,ISFREEZE = false,COOLDOWNTIME = 60,MEMORY = {DURATION = 30}},
         SUPERJUMP = {NAME = "火箭跳跃",SIGNAL = 102,ISFREEZE = false,COOLDOWNTIME = 10,MEMORY = {}},
@@ -406,12 +407,13 @@ local SKILL = {
         SEARCHER = {NAME = "追踪者",SIGNAL = 108,ISFREEZE = false,COOLDOWNTIME = 90,MEMORY = {DURATION = 30}},
         SURVEILLANCE = {NAME = "监控娃娃",SIGNAL = 109,ISFREEZE = false,COOLDOWNTIME = 5,MEMORY = {DURATION = 90}},
     },
+    --人类技能
     HUMAN = {
         STEEL = {NAME = "铜头铁骨",SIGNAL = 201,ISFREEZE = false,COOLDOWNTIME = 45,MEMORY = {}},
         SPRINTBURST = {NAME = "冲刺爆发",SIGNAL = 202,ISFREEZE = false,COOLDOWNTIME = 5,MEMORY = {}},
         CURE = {NAME = "自我愈合",SIGNAL = 203,ISFREEZE = false,COOLDOWNTIME = 60,MEMORY = {}},
         FIRESTRIKE = {NAME = "火力打击",SIGNAL = 204,ISFREEZE = false,COOLDOWNTIME = 90,MEMORY = {}},
-        ADRENALHORMONE = {NAME = "肾上腺素",SIGNAL = 205,ISFREEZE = false,COOLDOWNTIME = 90,MEMORY = {}},
+        VAMPIRE = {NAME = "吸血鬼",SIGNAL = 205,ISFREEZE = false,COOLDOWNTIME = 90,MEMORY = {}},
 	},
 }
 
@@ -436,12 +438,12 @@ if Game ~= nil then
         SkillsUsed = {},
     };
 
+    --变身人类
     function SKILL.WORLD.TOBEHUMAN:CALL(player)
         Human.Players[#Human.Players + 1] = player;
         player.model = Game.MODEL.DEFAULT;
         player.maxhealth = 1000;
         player.health = 1000;
-        player.team = Game.TEAM.CT;
         player.user.ishuman = true;
         player.user.ismonster = false;
         player:SetThirdPersonView(90,90);
@@ -450,22 +452,23 @@ if Game ~= nil then
         player:Signal(0);
     end
 
+    --变身僵尸
     function SKILL.WORLD.TOBEZOMBIE:CALL(player)
         Zombie.Players[#Zombie.Players + 1] = player;
         player.model = Game.MODEL.BLOTTER_ZOMBIE_HOST;
-        player.team = Game.TEAM.TR;
         player.maxhealth = 10000;
         player.health = 10000;
-        player.flinch = 0;
-        player.knockback = 0;
         player.user.ishuman = false;
         player.user.ismonster = true;
+        player.flinch = 0;
+        player.knockback = 0;
         player:SetFirstPersonView();
 
         player:Signal(SKILL.WORLD.TOBEZOMBIE.SIGNAL);
         player:Signal(0);
     end
 
+    --减速
     function SKILL.WORLD.SLOWDOWN:CALL(player)
         local id = Event:addEventListener("OnUpdate",function(time)
             if player ~= nil then
@@ -481,6 +484,7 @@ if Game ~= nil then
         end,self.MEMORY.DURATION);
     end
 
+    --变色
     function SKILL.WORLD.DISCOLOR:CALL(player)
         player:SetRenderFX(Game.RENDERFX.GLOWSHELL);
         player:SetRenderColor(self.MEMORY.COLOR);
@@ -493,6 +497,7 @@ if Game ~= nil then
         end
     end
 
+    --致命打击
     function SKILL.ZOMBIE.FATALBLOW:CALL(zombie)
         local id = Event:addEventListener("OnTakeDamage",function(victim, attacker, damage, weapontype, hitbox)
             if attacker~= nil then
@@ -508,8 +513,10 @@ if Game ~= nil then
         Timer:schedule(function()
             Event:detachEventListener(id);
         end,self.MEMORY.DURATION);
+
     end
 
+    --火箭跳跃
     function SKILL.ZOMBIE.SUPERJUMP:CALL(zombie)
         zombie.velocity = {
             x = zombie.velocity.x,
@@ -522,25 +529,43 @@ if Game ~= nil then
         SKILL.WORLD.DISCOLOR:CALL(zombie);
     end
 
+    --鬼影步
     function SKILL.ZOMBIE.GHOSTSTEP:CALL(zombie)
         local length = math.sqrt(zombie.velocity.x * zombie.velocity.x +
         zombie.velocity.y * zombie.velocity.y +
         zombie.velocity.z * zombie.velocity.z);
-        zombie.position = {
-            x = math.floor(zombie.position.x + self.MEMORY.VALUE * self.MEMORY.VALUE / 400 * zombie.velocity.x / length),
-            y = math.floor(zombie.position.y + self.MEMORY.VALUE * self.MEMORY.VALUE / 400 * zombie.velocity.y / length),
-            z = math.floor(zombie.position.z),
-        };
 
-        SKILL.WORLD.SLOWDOWN.MEMORY.DURATION = 3;
-        SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.1;
-        SKILL.WORLD.SLOWDOWN:CALL(zombie);
-
-        SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 1.5;
-        SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 255,g = 32,b = 32};
-        SKILL.WORLD.DISCOLOR:CALL(zombie);
+        Timer:schedule(function()
+            zombie.position = {
+                x = math.floor(zombie.position.x + self.MEMORY.VALUE * self.MEMORY.VALUE / 300 * zombie.velocity.x / length),
+                y = math.floor(zombie.position.y + self.MEMORY.VALUE * self.MEMORY.VALUE / 300 * zombie.velocity.y / length),
+                z = math.floor(zombie.position.z),
+            };
+        end,0);
+        Timer:schedule(function()
+            zombie.position = {
+                x = math.floor(zombie.position.x + self.MEMORY.VALUE * self.MEMORY.VALUE / 350 * zombie.velocity.x / length),
+                y = math.floor(zombie.position.y + self.MEMORY.VALUE * self.MEMORY.VALUE / 350 * zombie.velocity.y / length),
+                z = math.floor(zombie.position.z),
+            };
+        end,0.15);
+        Timer:schedule(function()
+            zombie.position = {
+                x = math.floor(zombie.position.x + self.MEMORY.VALUE * self.MEMORY.VALUE / 400 * zombie.velocity.x / length),
+                y = math.floor(zombie.position.y + self.MEMORY.VALUE * self.MEMORY.VALUE / 400 * zombie.velocity.y / length),
+                z = math.floor(zombie.position.z),
+            };
+            SKILL.WORLD.SLOWDOWN.MEMORY.DURATION = 3;
+            SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.1;
+            SKILL.WORLD.SLOWDOWN:CALL(zombie);
+    
+            SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 1.5;
+            SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 255,g = 32,b = 32};
+            SKILL.WORLD.DISCOLOR:CALL(zombie);
+        end,0.3);
     end
 
+    --轻如鸿毛
     function SKILL.ZOMBIE.LIGHTWEIGHT:CALL(zombie)
         local value = self.MEMORY.VALUE;
         local id = Event:addEventListener("OnUpdate",function(time)
@@ -562,13 +587,18 @@ if Game ~= nil then
         end);
         Timer:schedule(function()
             Event:detachEventListener(id);
+            SKILL.WORLD.SLOWDOWN.MEMORY.DURATION = 3;
+            SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.5;
+            SKILL.WORLD.SLOWDOWN:CALL(zombie);
         end,self.DURATION);
     end
 
+    --地心引力
     function SKILL.ZOMBIE.GRAVITY:CALL(zombie)
 
     end
 
+    --撼地一击
     function SKILL.ZOMBIE.HITGROUND:CALL(zombie)
         for i=1,#Human.Players do
 	        local length = (zombie.position.x - Human.Players[i].position.x) * (zombie.position.x - Human.Players[i].position.x) +
@@ -583,15 +613,21 @@ if Game ~= nil then
                 Human.Players[i].health = Human.Players[i].health - (500 - length) / 2;
             end
         end
+        SKILL.WORLD.SLOWDOWN.MEMORY.DURATION = 3;
+        SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.5;
+        SKILL.WORLD.SLOWDOWN:CALL(zombie);
+
         SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 1.5;
         SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 255,g = 128,b = 128};
         SKILL.WORLD.DISCOLOR:CALL(zombie);
     end
 
+    --聆听
     function SKILL.ZOMBIE.LISTEN:CALL(zombie)
 
     end
 
+    --追踪者
     function SKILL.ZOMBIE.SEARCHER:CALL(zombie)
         if #Human.Players > 0 then
             local monster = Game.Monster:Create(Game.MONSTERTYPE.PUMPKINHEAD,zombie.position);
@@ -616,11 +652,13 @@ if Game ~= nil then
         end
     end
 
+    --监控娃娃
     function SKILL.ZOMBIE.SURVEILLANCE:CALL(zombie)
         if self.MEMORY.MONSTER == nil then
             self.MEMORY.MONSTER = Game.Monster:Create(Game.MONSTERTYPE.A104RL,zombie.position);
             if self.MEMORY.MONSTER ~= nil then
                 self.MEMORY.MONSTER:Stop(true);
+                self.MEMORY.MONSTER.user.name = zombie.name;
                 SKILL.WORLD.DISCOLOR.MEMORY.DURATION = 0;
                 SKILL.WORLD.DISCOLOR.MEMORY.COLOR = {r = 64,g = 64,b = 198};
                 SKILL.WORLD.DISCOLOR:CALL(self.MEMORY.MONSTER);
@@ -634,17 +672,18 @@ if Game ~= nil then
                 end,5);
             end
         else
-            --zombie.position = self.MEMORY.MONSTER.position;
+            zombie.position = self.MEMORY.MONSTER.position;
             --self.MEMORY.MONSTER ;
             self.MEMORY.MONSTER = nil;
         end
     end
 
-
+    --铜头铁骨
     function SKILL.HUMAN.STEEL:CALL(human)
 
     end
 
+    --冲刺爆发
     function SKILL.HUMAN.SPRINTBURST:CALL(human)
         local length = math.sqrt(human.velocity.x * human.velocity.x +
         human.velocity.y * human.velocity.y +
@@ -667,6 +706,7 @@ if Game ~= nil then
         SKILL.WORLD.DISCOLOR:CALL(human);
     end
 
+    --自我愈合
     function SKILL.HUMAN.CURE:CALL(human)
         if human.health + 150 < human.maxhealth then
             human.health = human.health + 150;
@@ -678,11 +718,13 @@ if Game ~= nil then
         SKILL.WORLD.DISCOLOR:CALL(human);
     end
 
+    --火力打击
     function SKILL.HUMAN.FIRESTRIKE:CALL(human)
         
     end
 
-    function SKILL.HUMAN.ADRENALHORMONE:CALL(human)
+    --吸血鬼
+    function SKILL.HUMAN.VAMPIRE:CALL(human)
         
     end
 
@@ -715,11 +757,15 @@ if Game ~= nil then
     local SyncGameState = Game.SyncValue.Create("游戏状态");
     SyncGameState.value = GameState;
 
+    Event:addEventListener("OnPlayerSpawn",function(player)
+        SKILL.WORLD.TOBEHUMAN:CALL(player);
+    end);
+
     Event:addEventListener("OnUpdate",function(time)
         if GameState == State.Ready then
             if #Players >= 1 then
 
-                SKILL.WORLD.TOBEHUMAN:CALL(Players[1]);
+                SKILL.WORLD.TOBEZOMBIE:CALL(Players[1]);
 
                 GameState = State.Start;
                 SyncGameState.value = GameState;
@@ -737,6 +783,7 @@ if Game ~= nil then
         end
     end);
 
+    --没5秒减少玩家生命值
     Timer:schedule(function()
         for i = 1,#Human.Players do
             print("玩家".. Human.Players[i].name .."生命减少10点");
@@ -757,19 +804,18 @@ if Game ~= nil then
         end
     end);
 
+    --玩家被攻击后会被击飞，而攻击者得到3秒减速效果
     Event:addEventListener("OnTakeDamage",function(victim, attacker, damage, weapontype, hitbox)
-            if attacker.team == Game.TEAM.T then
+            if attacker.user.ismonster then
                 victim.velocity = {
                     x = 700 * (victim.position.x - attacker.position.x),
                     y = 700 * (victim.position.y - attacker.position.y),
                     z = 300,
                 };
-                attacker.velocity = {
-                    x = 0,
-                    y = 0,
-                    z = 0,
-                };
-        end
+                SKILL.WORLD.SLOWDOWN.MEMORY.DURATION = 3;
+                SKILL.WORLD.SLOWDOWN.MEMORY.SPEED = 0.2;
+                SKILL.WORLD.SLOWDOWN:CALL(attacker);
+            end
     end);
 end
 
@@ -795,9 +841,10 @@ if UI ~= nil then
         GameState = self.value;
     end
 
-
+    --僵尸技能列表
     local ZombieSkillList = {SKILL.ZOMBIE.SURVEILLANCE,SKILL.ZOMBIE.SUPERJUMP,SKILL.ZOMBIE.GHOSTSTEP,SKILL.ZOMBIE.LIGHTWEIGHT};
-
+    
+    --人类技能列表
     local HumanSkillList = {SKILL.HUMAN.STEEL,SKILL.HUMAN.SPRINTBURST,SKILL.HUMAN.CURE,SKILL.HUMAN.FIRESTRIKE};
     
     local SkillIndex = 1;
