@@ -2,6 +2,21 @@
 --灵感来自于黎明杀机，游戏分成两个阵营：人类与僵尸，人类手无寸铁要躲避僵尸的追杀，每隔一段时间人类的生命就会减少，
 --为了活命人类必须要到指定的地点恢复生命，人类必须利用地形，视角，技能来躲避僵尸的追杀
 --不过我现在不想搞了，感觉好无聊，很累啊（＞人＜；）
+-- {
+--     "game": [
+--       "Game_CrisisNight.lua"
+--     ],
+--     "ui": [
+--       "Font/Font_1.lua",
+--       "Font/Font_2.lua",
+--       "Font/Font_3.lua",
+--       "Font/Font_4.lua",
+--       "Font/Font_5.lua",
+--       "Font/Font_6.lua",
+--       "Font/Font_7.lua",
+--       "Game_CrisisNight.lua"
+--     ]
+--   }
 local Event = (function()
     local Event = {
         array = {},
